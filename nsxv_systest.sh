@@ -270,7 +270,8 @@ main() {
       revert_ws "$EXT_NODES"
     fi
   else
-    [ -n $DESTROY_ENV_AFTER ] && dos.py destroy $ENV_NAME
+    echo  "$DESTROY_ENV_AFTER"
+    [ -n "$DESTROY_ENV_AFTER" ] && dos.py destroy $ENV_NAME
     echo Tests failed
   fi
 
@@ -312,6 +313,7 @@ setup_bridge() {
 }
 
 set_vcenter() {
+  # If param is bool, use 'true' or 'false'.
   export VCENTER_USE="true"
   export VCENTER_IP="172.16.0.254"
   export VCENTER_USERNAME="administrator@vsphere.local"
@@ -335,7 +337,7 @@ set_vcenter() {
   export NSXV_MGT_NET_MOID='network-222'
   export NSXV_MGT_NET_PROXY_IPS='172.16.0.29'
   export NSXV_MGT_NET_PROXY_NETMASK='255.255.255.0'
-  export NSXV_MGT_NET_DEFAULT_GATEWAY='172.16.0.1'
+  export NSXV_MGT_NET_DEFAULT_GW='172.16.0.1'
   export NSXV_EDGE_HA='false'
 
   export JOB_NAME="vcenter_system_test"
@@ -383,7 +385,7 @@ revert_ws() {
   do
     vmrun -T ws-shared -h https://localhost:443/sdk -u vmware -p $password listRegisteredVM | grep -q $i || { echo "VM $i does not exist"; continue; }
     echo vmrun: reverting $i to $EXT_SNAPSHOT 
-    vmrun -T ws-shared -h https://localhost:443/sdk -u vmware -p $password revertToSnapshot "[standard] $i/$i.vmx" $EXT_SNAPSHOT || { echo "Error: revert of $i falied";  return 1; }
+    vmrun -T ws-shared -h https://localhost:443/sdk -u vmware -p $password revertToSnapshot "[standard] $i/$i.vmx" $EXT_SNAPSHOT || { echo "Error: revert of $i failed";  return 1; }
     echo vmrun: starting $i
     vmrun -T ws-shared -h https://localhost:443/sdk -u vmware -p $password start "[standard] $i/$i.vmx" || { echo "Error: $i failed to start";  return 1; }
   done
