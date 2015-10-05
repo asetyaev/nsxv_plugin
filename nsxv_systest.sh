@@ -125,18 +125,13 @@ then
   exit 1
 fi
 
-
-
 main() {
-
   if [ -n "$ISO_PATH" -a -n "$GET_ISO" ]; then echo "Path to ISO and release version to download both specified, please choose only one"; exit 1; fi
 
   if [ -z $TEST_GROUP ]; then 
-    export TEST_GROUP="vcenter_one_node";
-    echo "Choosing vcenter_one_node test group by default."
+    export TEST_GROUP="nsxv_smoke";
+    echo "Choosing nsxv_smoke test group by default."
   fi
-
-  check_testgroup ${TEST_GROUP}
 
   if [ -n "$GET_ISO" -a -z "$MAGNET_LINK" ]; then
     echo "Getting latest ISO for Fuel release $GET_ISO"
@@ -194,6 +189,11 @@ main() {
     esac
   fi
 
+  if [[ $TEST_GROUP == nsxv_smoke ]]
+  then
+    dos.py list | grep -q $ENV_NAME && { echo erasing old $ENV_NAME; dos.py erase $ENV_NAME ; }
+  fi
+
   if [ -n  "$USE_EXISTING" ]; then
     KEEPENV_BEFORE_OPT="-k";
   else
@@ -232,7 +232,10 @@ main() {
 
   clean_iptables
 
-  revert_ws "$EXT_NODES" || { echo "killing $SYSTEST_PID and its childs" && pkill --parent $SYSTEST_PID && kill $SYSTEST_PID && exit 1; }
+  if [[ $TEST_GROUP == nsxv_smoke ]]
+  then
+    revert_ws "$EXT_NODES" || { echo "killing $SYSTEST_PID and its childs" && pkill --parent $SYSTEST_PID && kill $SYSTEST_PID && exit 1; }
+  fi
 
   #fixme should use only one clean_iptables call
   clean_iptables
@@ -247,7 +250,7 @@ main() {
 
   echo Result is $RES
 
-#workaround for jenkins marking tests as failed on segfaults
+  #workaround for jenkins marking tests as failed on segfaults
   if [ $RES -eq 139 ]
   then
     grep 'errors="0"' nosetests.xml | grep -q 'failures="0"' && echo SEGFAULT workaround && RES=0
@@ -398,25 +401,6 @@ setup_net() {
   add_interface_to_bridge $env private vmnet2 10.0.0.1/24
   add_interface_to_bridge $env public vmnet1 172.16.0.1/24
 }
-
-check_testgroup() {
-  group=$1
-  [ "$group" = "vcenter_empty" ] && return
-  [ "$group" = "nsx_empty" ] && return
-  #fixme
-  grep -qr --include \*.py "\"${group}\""  ||
-  {
-    [ "${group}" = "vcenter_one_node" ] && echo "
-
-vcenter_one_node not in fuel-main yet.
-You need to manually cherry-pick it with : git fetch https://review.openstack.org/stackforge/fuel-main refs/changes/34/152634/3 && git cherry-pick FETCH_HEAD
-
-"
-    echo "Test group ${group} does not exist inside current directory, exiting";
-    exit 1;
-  }
-}
-
 
 if [ -z $FIXNET ]; then
   main
