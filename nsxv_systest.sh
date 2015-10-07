@@ -189,11 +189,6 @@ main() {
     esac
   fi
 
-  if [[ $TEST_GROUP == nsxv_smoke ]]
-  then
-    dos.py list | grep -q $ENV_NAME && { echo erasing old $ENV_NAME; dos.py erase $ENV_NAME ; }
-  fi
-
   if [ -n  "$USE_EXISTING" ]; then
     KEEPENV_BEFORE_OPT="-k";
   else
@@ -232,10 +227,7 @@ main() {
 
   clean_iptables
 
-  if [[ $TEST_GROUP == nsxv_smoke ]]
-  then
-    revert_ws "$EXT_NODES" || { echo "killing $SYSTEST_PID and its childs" && pkill --parent $SYSTEST_PID && kill $SYSTEST_PID && exit 1; }
-  fi
+  revert_ws "$EXT_NODES" || { echo "killing $SYSTEST_PID and its childs" && pkill --parent $SYSTEST_PID && kill $SYSTEST_PID && exit 1; }
 
   #fixme should use only one clean_iptables call
   clean_iptables
