@@ -227,7 +227,7 @@ main() {
 
   clean_iptables
 
-  #revert_ws "$EXT_NODES" || { echo "killing $SYSTEST_PID and its childs" && pkill --parent $SYSTEST_PID && kill $SYSTEST_PID && exit 1; }
+  revert_ws "$EXT_NODES" || { echo "killing $SYSTEST_PID and its childs" && pkill --parent $SYSTEST_PID && kill $SYSTEST_PID && exit 1; }
 
   #fixme should use only one clean_iptables call
   clean_iptables
