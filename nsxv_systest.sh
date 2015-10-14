@@ -169,7 +169,7 @@ main() {
   #if [ -z $VENV_PATH ]; then export VENV_PATH=~jenkins/venv-nailgun-tests; fi
   [ -z $VIRTUAL_ENV ] && { echo "Please activate python venv before running this script(e.g. with 'source /home/jenkins/venv-nailgun-tests/bin/activate')"; exit 1; }
   if [ -z $OPENSTACK_RELEASE ]; then export OPENSTACK_RELEASE='CentOS'; fi
-  if [ -z $NODES_COUNT ]; then export NODES_COUNT=6; fi
+  if [ -z $NODES_COUNT ]; then export NODES_COUNT=10; fi
   if [ -z $JOB_NAME ]; then export JOB_NAME='manual_systest'; fi
   if [ -z $ENV_NAME ]; then export ENV_NAME=${ENV_PREFIX}${VERSION_STRING}_${OPENSTACK_RELEASE}_${TEST_GROUP}; fi
 
@@ -227,7 +227,7 @@ main() {
 
   clean_iptables
 
-  revert_ws "$EXT_NODES" || { echo "killing $SYSTEST_PID and its childs" && pkill --parent $SYSTEST_PID && kill $SYSTEST_PID && exit 1; }
+  #revert_ws "$EXT_NODES" || { echo "killing $SYSTEST_PID and its childs" && pkill --parent $SYSTEST_PID && kill $SYSTEST_PID && exit 1; }
 
   #fixme should use only one clean_iptables call
   clean_iptables
@@ -309,12 +309,13 @@ setup_bridge() {
 
 set_vcenter() {
   # If param is bool, use 'true' or 'false'.
+  export NEUTRON_SEGMENT_TYPE='tun'
   export VCENTER_USE="true"
   export VCENTER_IP="172.16.0.254"
   export VCENTER_USERNAME="administrator@vsphere.local"
   export VCENTER_PASSWORD="Qwer!1234"
-  export VCENTER_DATACENTER="Datacenter"
-  export VCENTER_DATASTORE="nfs"
+  export VC_DATACENTER="Datacenter"
+  export VC_DATASTORE="nfs"
   export VCENTER_IMAGE_DIR="/openstack_glance"
 
   export NSXV_MANAGER_IP='172.16.0.249'
