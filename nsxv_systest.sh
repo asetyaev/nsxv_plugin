@@ -5,6 +5,14 @@ set -x
 LOG=tpi_systest.log
 JENKINS_URL="http://jenkins-product.srt.mirantis.net:8080/"
 
+# MU1 update
+export UPDATE_MASTER=true
+export UPDATE_FUEL_MIRROR='http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/proposed/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/'
+export EXTRA_DEB_REPOS='mos-updates-2,deb http://mirror.fuel-infra.org/mos-repos/ubuntu/7.0/ mos7.0-proposed main restricted'
+export EXTRA_DEB_REPOS_PRIORITY=1200
+
+#|mos-security-2,deb http://mirror.fuel-infra.org/mos-repos/ubuntu/7.0/ mos7.0-security main restricted
+
 >$LOG
 exec >  >(tee -a $LOG)
 exec 2> >(tee -a $LOG >&2)
@@ -13,7 +21,7 @@ shopt -s nocasematch
 
 usage() {
   progname=$(basename $0)
-  echo -e "usage: $progname [ -i iso_path | -r release]  [ -d distro ] [ -t testgroup ] [ -n number ] [ -p path ] [--existing ] [ --destroy ] [--erase ] | --fixnet ENV | --revert"
+  echo -e "usage: $progname [ -i iso_path | -r release]  [ -d distro ] [ -t testgroup ] [ -n number ] [ -p path ] [--existing ] [ --destroy ] [--erase ] [ --fixnet ENV ] [ --revert-after ] [ --revert-vmw ]"
   echo -e "\t-i iso_path\tpath to MOS ISO, e.g: ~/Downloads/fuel-6.0-129-2014-11-22_22-01-00.iso"
   echo -e "\t-r release\tfuel release version, torrent client will be used to download last ISO for this release"
   echo -e "\t-d distro\tdistribution to install possible values: centos, ubuntu"
@@ -24,11 +32,12 @@ usage() {
   echo -e "\t--destroy\tshutoff libvirt nodes after completion"
   echo -e "\t--erase\t\tcompletely erase env if system test is successful"
   echo -e "\t--revert-after\trevert VMware Workstation VMs to clean state if system test is successful"
+  echo -e "\t--revert-vmw\tjust revert VMware Workstation VMs"
   echo -e "\t--fixnet ENV\tfix network configuration of existing environment ENV"
   exit 255
 }
 
-args=$(getopt -o d:t:i:r:n:p: -l existing,erase,destroy,revert-after,fixnet: -- "$@")
+args=$(getopt -o d:t:i:r:n:p: -l existing,erase,destroy,revert-after,fixnet,revert-vmw: -- "$@")
 
 if [ $? -ne 0 -o $# -lt 1 ]; then
   usage
@@ -105,6 +114,10 @@ while true; do
       ;;
     --revert-after)
       REVERT_AFTER=1
+      ;;
+    --revert-vmw)
+      revert_ws
+      exit 1
       ;;
     --fixnet)
       if [ $# -gt 3 ]; then echo "--fixnet should be used only with ENV name"; exit 1; fi
@@ -204,6 +217,7 @@ main() {
   echo sh -x "utils/jenkins/system_tests.sh" -t test $KEEPENV_BEFORE_OPT $KEEPENV_AFTER_OPT -e $ENV_NAME -w $WORKSPACE  -V $VIRTUAL_ENV -j $JOB_NAME -i "${ISO_PATH}" -o --group=$TEST_GROUP
 
   sh -x "utils/jenkins/system_tests.sh"  -t test $KEEPENV_BEFORE_OPT $KEEPENV_AFTER_OPT -e $ENV_NAME -w $WORKSPACE  -V $VIRTUAL_ENV -j $JOB_NAME -i "${ISO_PATH}" -o --group=$TEST_GROUP &
+
   SYSTEST_PID=$!
 
   if ! ps -p $SYSTEST_PID > /dev/null
@@ -309,6 +323,7 @@ setup_bridge() {
 
 set_vcenter() {
   # If param is bool, use 'true' or 'false'.
+  export DISABLE_SSL="true"
   export NEUTRON_SEGMENT_TYPE='tun'
   export VCENTER_USE="true"
   export VCENTER_IP="172.16.0.254"
