@@ -56,6 +56,9 @@ check_arg() {
   fi
 }
 
+export EXT_NODES="esxi1 esxi2 esxi3 vcenter trusty"
+[ -z $EXT_SNAPSHOT ] && export EXT_SNAPSHOT="nsxv"
+
 while true; do
   case "$1" in
     -d)
@@ -116,8 +119,8 @@ while true; do
       REVERT_AFTER=1
       ;;
     --revert-vmw)
-      revert_ws
-      exit 1
+      shift
+      REVERT_WS=1
       ;;
     --fixnet)
       if [ $# -gt 3 ]; then echo "--fixnet should be used only with ENV name"; exit 1; fi
@@ -334,7 +337,6 @@ set_vcenter() {
   export VCENTER_IMAGE_DIR="/openstack_glance"
 
   export NSXV_MANAGER_IP='172.16.0.249'
-  export NSXV_INSECURE='true'
   export NSXV_USER='admin'
   export NSXV_PASSWORD='r00tme'
   export NSXV_DATACENTER_MOID='datacenter-126'
@@ -349,15 +351,14 @@ set_vcenter() {
   export NSXV_MGT_NET_PROXY_IPS='172.16.0.29'
   export NSXV_MGT_NET_PROXY_NETMASK='255.255.255.0'
   export NSXV_MGT_NET_DEFAULT_GW='172.16.0.1'
-  export NSXV_EDGE_HA='false'
+  export NSXV_EDGE_HA='true'
+  export NSXV_INSECURE='true'
 
   export JOB_NAME="vcenter_system_test"
   export ENV_TYPE="vcenter"
-  export EXT_NODES="esxi1 esxi2 esxi3 vcenter trusty"
   export EXT_IFS="vmnet1 vmnet2"
 
   export VCENTER_CLUSTERS="Cluster1"
-  [ -z $EXT_SNAPSHOT ] && export EXT_SNAPSHOT="nsxv"
 }
 
 clean_old_bridges() {
@@ -409,6 +410,12 @@ setup_net() {
   add_interface_to_bridge $env private vmnet2 10.0.0.1/24
   add_interface_to_bridge $env public vmnet1 172.16.0.1/24
 }
+
+
+if [ -n "$REVERT_WS" ]; then
+  revert_ws "$EXT_NODES"
+  exit 1
+fi
 
 if [ -z $FIXNET ]; then
   main
