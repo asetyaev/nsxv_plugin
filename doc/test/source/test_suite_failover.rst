@@ -67,12 +67,12 @@ Steps
 
     1. Log in to Fuel with preinstalled plugin and deployed enviroment with 3 controllers.
     2. Log in to Horizon.
-    3. Create VM and check connectivity to outside world from VM.
+    3. Create vcenter VM and check connectivity to outside world from VM.
     4. Shutdown primary controller.
     5. Ensure that VIPs are moved to other controller.
     6. Ensure connectivity to outside world from created VM.
     7. Create a new network and attach it to router.
-    8. Create a VM with new network and check network connectivity.
+    8. Create a vcenter VM with new network and check network connectivity.
 
 
 Expected result
@@ -108,8 +108,8 @@ Steps
 
     1. Log in to Fuel with preinstalled plugin and deployed enviroment.
     2. Log in to Horizon.
-    3. Launch instance VM_1 with image TestVM-VMDK and flavor m1.tiny.
-    4. Launch instance VM_2  with image TestVM-VMDK and flavor m1.tiny.
+    3. Launch vcenter instance VM_1 with image TestVM-VMDK and flavor m1.tiny.
+    4. Launch vcenter instance VM_2 with image TestVM-VMDK and flavor m1.tiny.
     5. Check connection between VMs, send ping from VM_1 to VM_2 and vice verse.
     6. Reboot vcenter::
 

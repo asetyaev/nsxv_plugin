@@ -44,9 +44,8 @@ Steps
     7. Configure VMware vCenter Settings. Add 2 vSphere clusters and configure Nova Compute instances on conrollers and compute-vmware.
     8. Verify networks.
     9. Deploy cluster.
-    10. Split availability zone to vcenter1 and vcenter2 with one nova compute cluster in each zone.
-    11. Run OSTF.
-    12. Launch instances from "TestVM-VMDK" image which is included in plugin package and is available under Horizon. Use m1.tiny flavor.
+    10. Run OSTF.
+    11. Launch instances from images which are available under Horizon. Use m1.tiny flavor.
 
 
 Expected result
@@ -121,7 +120,7 @@ Steps
     1. Log in to Horizon Dashboard.
     2. Navigate to Project -> Compute -> Instances
     3. Launch instance VM_1 with image TestVM-VMDK and flavor m1.tiny.
-    4. Launch instance VM_2 with image TestVM-VMDK and flavor m1.tiny.
+    4. Launch instance VM_2 with image TestVM and flavor m1.tiny.
     5. Verify that VMs should communicate between each other. Send icmp ping from VM_1 to VM_2 and vice versa.
     6. Disable NSX_port of VM_1.
     7. Verify that VMs should not communicate between each other. Send icmp ping from VM_2 to VM_1 and vice versa.
@@ -165,8 +164,8 @@ Steps
     3. Add two private networks (net01 and net02).
     4. Add one subnet (net01_subnet01: 192.168.101.0/24, net02_subnet01, 192.168.101.0/24) to each network.
        NOTE: We have a constraint about network interfaces. One of subnets should have gateway and another should not. So disable gateway on that subnet.
-    5. Launch instance VM_1 with image TestVM-VMDK and flavor m1.tiny in vcenter1 az.
-    6. Launch instance VM_2 with image TestVM-VMDK and flavor m1.tiny in vcenter2 az.
+    5. Launch instance VM_1 with image TestVM-VMDK and flavor m1.tiny in vcenter az.
+    6. Launch instance VM_2 with image TestVM and flavor m1.tiny in nova az.
     7. Check abilities to assign multiple vNIC net01 and net02 to VM_1.
     8. Check abilities to assign multiple vNIC net01 and net02 to VM_2.
     9. Send icmp ping from VM_1 to VM_2 and vice versa.
@@ -205,11 +204,11 @@ Steps
 
     1. Setup for system tests.
     2. Log in to Horizon Dashboard.
-    3. Add two private networks (net01, and net02).
+    3. Add two private networks (net01 and net02).
     4. Add one subnet (net01_subnet01: 192.168.101.0/24, net02_subnet01, 192.168.101.0/24) to each network. Disable gateway for all subnets.
     5. Navigate to Project -> Compute -> Instances
-    6. Launch instances VM_1 and VM_2 in the network 192.168.101.0/24 with image TestVM-VMDK and flavor m1.tiny in vcenter1 az. Attach default private net as a NIC 1.
-    7. Launch instances VM_3 and VM_4 in the network 192.168.101.0/24 with image TestVM-VMDK and flavor m1.tiny in vcenter2 az. Attach default private net as a NIC 1.
+    6. Launch instances VM_1 and VM_2 in the network 192.168.101.0/24 with image TestVM-VMDK and flavor m1.tiny in vcenter az. Attach default private net as a NIC 1.
+    7. Launch instances VM_3 and VM_4 in the network 192.168.101.0/24 with image TestVM and flavor m1.tiny in nova az. Attach default private net as a NIC 1.
     8. Verify that VMs of same networks should communicate
        between each other. Send icmp ping from VM_1 to VM_2, VM_3 to VM_4 and vice versa.
     9. Verify that VMs of different networks should not communicate
@@ -258,8 +257,8 @@ Steps
     2. Log in to Horizon Dashboard.
     3. Create shared router(default type) and use it for routing between instances.
     4. Navigate to Project -> Compute -> Instances
-    5. Launch instance VM_1 in the provider network with image TestVM-VMDK and flavor m1.tiny in the vcenter1 az.
-    6. Launch instance VM_2 in the provider network with image TestVM-VMDK and flavor m1.tiny in the vcenter2 az.
+    5. Launch instance VM_1 in the provider network with image TestVM-VMDK and flavor m1.tiny in the vcenter az.
+    6. Launch instance VM_2 in the provider network with image TestVM and flavor m1.tiny in the nova az.
     7. Verify that VMs of same provider network should communicate between each other. Send icmp ping from VM_1 to VM_2 and vice versa.
 
 
@@ -301,8 +300,8 @@ Steps
           neutron router-create rdistributed --distributed True
     4. Disconnect default networks private and floating from default router and connect to distributed router.
     5. Navigate to Project -> Compute -> Instances
-    6. Launch instance VM_1 in the provider network with image TestVM-VMDK and flavor m1.tiny in the vcenter1 az.
-    7. Launch instance VM_2 in the provider network with image TestVM-VMDK and flavor m1.tiny in the vcenter2 az.
+    6. Launch instance VM_1 in the provider network with image TestVM-VMDK and flavor m1.tiny in the vcenter az.
+    7. Launch instance VM_2 in the provider network with image TestVM and flavor m1.tiny in the nova az.
     8. Verify that VMs of same provider network should communicate between each other. Send icmp ping from VM_1 to VM_2 and vice versa.
 
 
@@ -344,8 +343,8 @@ Steps
           neutron router-create rexclusive --router_type exclusive
     4. Disconnect default networks private and floating from default router and connect to distributed router.
     5. Navigate to Project -> Compute -> Instances
-    6. Launch instance VM_1 in the provider network with image TestVM-VMDK and flavor m1.tiny in the vcenter1 az.
-    7. Launch instance VM_2 in the provider network with image TestVM-VMDK and flavor m1.tiny in the vcenter2 az.
+    6. Launch instance VM_1 in the provider network with image TestVM-VMDK and flavor m1.tiny in the vcenter az.
+    7. Launch instance VM_2 in the provider network with image TestVM and flavor m1.tiny in the nova az.
     8. Verify that VMs of same provider network should communicate between each other. Send icmp ping from VM _1 to VM_2 and vice versa.
 
 
@@ -448,12 +447,12 @@ Steps
     11. In tenant 'test_1' create security group 'SG_1' and add rule that allows ingress icmp traffic
     12. In tenant 'test_2' create net2 and subnet2 with CIDR 10.0.0.0/24
     13. In tenant 'test_2' create security group 'SG_2'
-    14. In tenant 'test_1' add VM_1 of vcenter1 in net1 with ip 10.0.0.4 and 'SG_1' as security group.
-    15. In tenant 'test_1' add VM_2 of vcenter2 in net1 with ip 10.0.0.5 and 'SG_1' as security group.
+    14. In tenant 'test_1' add VM_1 of vcenter in net1 with ip 10.0.0.4 and 'SG_1' as security group.
+    15. In tenant 'test_1' add VM_2 of nova in net1 with ip 10.0.0.5 and 'SG_1' as security group.
     16. In tenant 'test_2' create net1 and subnet1 with CIDR 10.0.0.0/24
     17. In tenant 'test_2' create security group 'SG_1' and add rule that allows ingress icmp traffic
-    18. In tenant 'test_2' add VM_3 of vcenter1 in net1 with ip 10.0.0.4 and 'SG_1' as security group.
-    19. In tenant 'test_2' add VM_4 of vcenter2 in net1 with ip 10.0.0.5 and 'SG_1' as security group.
+    18. In tenant 'test_2' add VM_3 of vcenter in net1 with ip 10.0.0.4 and 'SG_1' as security group.
+    19. In tenant 'test_2' add VM_4 of nova in net1 with ip 10.0.0.5 and 'SG_1' as security group.
     20. Assign floating IPs for all created VMs.
     21. Verify that VMs with same ip on different tenants should communicate between each other. Send icmp ping from VM_1 to VM_3, VM_2 to Vm_4 and vice versa.
 
@@ -492,8 +491,8 @@ Steps
     1. Setup for system tests.
     2. Log in to Horizon Dashboard.
     3. Create net01: net01_subnet, 192.168.111.0/24 and attach it to the router04
-    4. Launch instance VM_1 of vcenter1 AZ with image TestVM-VMDK and flavor m1.tiny in the net_04.
-    5. Launch instance VM_1 of vcenter2 AZ with image TestVM-VMDK and flavor m1.tiny in the net_01.
+    4. Launch instance VM_1 of vcenter az with image TestVM-VMDK and flavor m1.tiny in the net_04.
+    5. Launch instance VM_1 of nova az with image TestVM and flavor m1.tiny in the net_01.
     6. Send ping from instances VM_1 and VM_2 to 8.8.8.8 or other outside ip.
 
 
@@ -531,8 +530,8 @@ Steps
     1. Setup for system tests.
     2. Log in to Horizon Dashboard
     3. Create net01: net01_subnet, 192.168.111.0/24 and attach it to the router04
-    4. Launch instance VM_1 of vcenter1 AZ with image TestVM-VMDK and flavor m1.tiny in the net_04. Associate floating ip.
-    5. Launch instance VM_1 of vcenter2 AZ with image TestVM-VMDK and flavor m1.tiny in the net_01. Associate floating ip.
+    4. Launch instance VM_1 of vcenter az with image TestVM-VMDK and flavor m1.tiny in the net_04. Associate floating ip.
+    5. Launch instance VM_1 of nova az with image TestVM and flavor m1.tiny in the net_01. Associate floating ip.
     6. Send ping from instances VM_1 and VM_2 to 8.8.8.8 or other outside ip.
 
 
@@ -569,8 +568,8 @@ Steps
 
     1. Setup for system tests.
     2. Log in to Horizon Dashboard.
-    3. Launch instance VM_1 in the tenant network net_02 with image TestVM-VMDK and flavor m1.tiny in the vcenter1 az.
-    4. Launch instance VM_2 in the tenant network net_02 with image TestVM-VMDK and flavor m1.tiny in the vcenter2 az.
+    3. Launch instance VM_1 in the tenant network net_02 with image TestVM-VMDK and flavor m1.tiny in the vcenter az.
+    4. Launch instance VM_2 in the tenant network net_02 with image TestVM and flavor m1.tiny in the nova az.
     5. Create security groups SG_1 to allow ICMP traffic.
     6. Add Ingress rule for ICMP protocol to SG_1
     7. Attach SG_1 to VMs
@@ -624,7 +623,7 @@ Steps
 
     1. Setup for system tests.
     2. Log in to Horizon Dashboard.
-    3. Launch 2 instances in each AZ.
+    3. Launch 2 instances in each az.
     4. Verify that traffic can be successfully sent from and received on the MAC and IP address associated with the logical port.
     5. Configure a new IP address from the subnet not like original one on the instance associated with the logical port.
         * ifconfig eth0 down
@@ -671,9 +670,9 @@ Steps
 
     1. Setup for system tests.
     2. Navigate to Project -> Compute -> Instances
-    3. Launch 5 instance VM_1 simultaneously with image TestVM-VMDK and flavor m1.tiny in vcenter1 az in default net_04.
+    3. Launch 5 instance VM_1 simultaneously with image TestVM-VMDK and flavor m1.tiny in vcenter az in default net_04.
     4. All instance should be created without any error.
-    5. Launch 5 instance VM_2 simultaneously with image TestVM-VMDK and flavor m1.tiny in vcenter2 az in default net_04.
+    5. Launch 5 instance VM_2 simultaneously with image TestVM and flavor m1.tiny in nova az in default net_04.
     6. All instance should be created without any error.
     7. Check connection between VMs (ping, ssh)
     8. Delete all VMs from horizon simultaneously.
@@ -1198,7 +1197,7 @@ core
 Steps
 #####
 
-            1. Setup cluster with 3 controllers and cinder-vmware +
+            1. Setup cluster with 3 controllers, 2 Compute nodes and cinder-vmware +
                compute-vmware role.
             2. Assign instances in each az.
             3. Disable one of compute host with vCenter cluster
@@ -1211,6 +1210,9 @@ Steps
             7. Create several instances in vcenter az.
             8. Check that instances were created on enabled compute host
                (vcenter cluster).
+            9. Create several instances in nova az.
+            10. Check that instances were created on enabled compute host
+               (nova cluster).
 
 
 Expected result
