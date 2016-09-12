@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export FUEL_RELEASE=80
+export FUEL_RELEASE=90
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 
@@ -8,25 +8,25 @@ case "${FUEL_RELEASE}" in
   *80* ) export REQS_BRANCH="stable/8.0" ;;
   *70* ) export REQS_BRANCH="stable/7.0" ;;
   *61* ) export REQS_BRANCH="stable/6.1" ;;
-   *   ) export REQS_BRANCH="master"
+  *90* ) export REQS_BRANCH="stable/mitaka"
 esac
 
 REQS_PATH="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRANCH}/fuelweb_test/requirements.txt"
+REQS_PATH_DEVOPS="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRANCH}/fuelweb_test/requirements-devops-source.txt"
 
 function get_venv_requirements {
-    rm -f requirements.txt*
-    wget $REQS_PATH
-    export REQS_PATH="$(pwd)/requirements.txt"
+  rm -f requirements.*
+  wget -O requirements.txt $REQS_PATH
+  export REQS_PATH="$(pwd)/requirements.txt"
+  wget -O requirements-devops-source.txt $REQS_PATH_DEVOPS
+  export REQS_PATH_DEVOPS="$(pwd)/requirements-devops-source.txt"
 
-    if [[ "${REQS_BRANCH}" == "stable/8.0" ]]; then
-      # bug: https://bugs.launchpad.net/fuel/+bug/1528193
-      sed -i 's/python-neutronclient.*/python-neutronclient==3.1.0/' $REQS_PATH
-    fi
-    ## change version for some package
-    #if [[ "${REQS_BRANCH}" != "master" ]]; then
-    #  # bug: https://bugs.launchpad.net/fuel/+bug/1528193
-    #  sed -i 's/python-novaclient>=2.15.0/python-novaclient==2.35.0/' $REQS_PATH
-    #fi
+  if [[ "${REQS_BRANCH}" == "stable/8.0" ]]; then
+    # bug: https://bugs.launchpad.net/fuel/+bug/1528193
+    sed -i 's/@2.*/@2.9.20/g' $REQS_PATH_DEVOPS
+    #echo oslo.i18n >> $REQS_PATH
+    echo stable/8.0
+  fi
 }
 
 ## Recreate all an virtual env
@@ -37,12 +37,13 @@ function recreate_venv {
    
 function prepare_venv {
     source "${VENV_PATH}/bin/activate"
-    pip --version
-    [ $? -ne 0 ] && easy_install -U pip
+    easy_install -U pip
     if [[ "${DEBUG}" == "true" ]]; then
-        pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
+        pip install -r "${REQS_PATH}" --upgrade
+        pip install -r "${REQS_PATH_DEVOPS}" --upgrade
     else
         pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
+        pip install -r "${REQS_PATH_DEVOPS}" --upgrade > /dev/null 2>/dev/null
     fi
 
     django-admin.py syncdb --settings=devops.settings --noinput
