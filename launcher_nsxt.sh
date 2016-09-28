@@ -9,6 +9,7 @@ export WORKSTATION_PASSWORD='VMware01'
 export WORKSTATION_SNAPSHOT='nsx-t-1.0.1'
 export NSXT_PLUGIN_PATH=`ls ~/plugin/nsx-t-1*`
 export NSXT_PASSWORD='Qwer!1234'
+export VCENTER_PASSWORD='Qwer!1234'
 export WORKSPACE=$(pwd)
 
 
